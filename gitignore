@@ -1,0 +1,6 @@
+# Ignorar configuraciones locales con credenciales reales
+.env
+
+# Ignorar archivos del sistema o dependencias de composer si usaras
+/vendor/
+.DS_Store
