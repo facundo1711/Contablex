@@ -1,0 +1,41 @@
+<?php
+
+// 1. Cargar las variables de entorno desde el archivo .env
+$envPath = __DIR__ . '/.env';
+
+if (!file_exists($envPath)) {
+    die("Error: No se encontró el archivo .env con las credenciales de la base de datos. Copia el archivo .env.example como .env y configuralo.");
+}
+
+$config = parse_ini_file($envPath);
+
+// 2. Asignar variables
+$host     = $config['DB_HOST'];
+$port     = $config['DB_PORT'];
+$dbname   = $config['DB_NAME'];
+$user     = $config['DB_USER'];
+$password = $config['DB_PASSWORD'];
+
+// 3. Crear el DSN (Data Source Name) para PostgreSQL
+$dsn = "pgsql:host=$host;port=$port;dbname=$dbname;";
+
+try {
+    // 4. Inicializar la conexión PDO con opciones de seguridad y rendimiento
+    $opciones = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Lanza excepciones si hay errores SQL
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Devuelve los datos como arrays asociativos
+        PDO::ATTR_EMULATE_PREPARES   => false,                  // Usa preparaciones nativas de PostgreSQL para evitar Inyección SQL
+    ];
+
+    $pdo = new PDO($dsn, $user, $password, $opciones);
+    
+    // Conexión exitosa (Podés comentar esta línea en producción)
+    // echo "Conexión exitosa a Supabase (PostgreSQL).";
+
+} catch (PDOException $e) {
+    // En producción es mejor guardar esto en un archivo de log y no mostrar el error crudo en pantalla
+    die("Error crítico de conexión a la base de datos: " . $e->getMessage());
+}
+
+// Retornamos el objeto $pdo para poder usarlo en otros archivos (ej: de consultas, inserciones, etc.)
+return $pdo;
